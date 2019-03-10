@@ -5,8 +5,15 @@ import pickle
 import tensorflow.contrib.layers as layers
 import os 
 import sys
+import argparse
 
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--test", type=int, default=0, help="do you want to test only")
+parser.add_argument("--batch_size", type=int, default=256, help="batch size")
+
+a = parser.parse_args()
 
 NUM_BITS = 1000
 INPUT_SIZE    = 1       
@@ -14,9 +21,12 @@ RNN_HIDDEN    = 20
 OUTPUT_SIZE   = 3      
 TINY          = 1e-6   
 LEARNING_RATE = 0.0001
-BATCH_SIZE = 64
-TEST_EPOCHS = 10
+BATCH_SIZE = a.batch_size
+TEST_EPOCHS = 7
+ITERATIONS_PER_EPOCH = 65#int(20000/BATCH_SIZE) - 1
+NUM_EPOCHS = 100
 max_gradient_norm = 10
+only_testing = a.test
 
 def gradient_clip(gradients, max_gradient_norm):
     """Clipping gradients of a model."""
@@ -65,8 +75,8 @@ def generate_test_batch(num_bits, batch_size):
 
     for i in range(batch_size):
         # for j in range(num_bits):        
-        x[:, i, 0] = X[9000 - 1 + i]
-        y[i] = true_labels[9000 - 1 + i]
+        x[:, i, 0] = X[18000 - 1 + i]
+        y[i] = true_labels[18000 - 1 + i]
     return x, y
 
 def train():
@@ -121,16 +131,22 @@ def train():
     with tf.variable_scope(tf.get_variable_scope(), initializer=initializer):
         # with tf.variable_scope(tf.get_variable_scope(), initializer=initializer):
         init = tf.global_variables_initializer()
-        # sess.run(init)
-        saver.restore(sess, "/tmp/model.ckpt")
+        
+        if only_testing == 0:
+            sess.run(init)
+        else:
+            saver.restore(sess, "./tmp/model.ckpt")
+            print("Loaded saved model")
+
         merged = tf.summary.merge_all()
         train_writer = tf.summary.FileWriter('./train' ,sess.graph)
 
-        ITERATIONS_PER_EPOCH = 100#int(10000/BATCH_SIZE) - 1
-        NUM_EPOCHS = 100
+
 
     epoch_error_list = []
     test_accuracy_list = []
+  
+
     for epoch in range(NUM_EPOCHS):
         print("Epoch Number: ",epoch)
         
