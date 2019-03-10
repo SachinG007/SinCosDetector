@@ -121,13 +121,16 @@ def train():
     with tf.variable_scope(tf.get_variable_scope(), initializer=initializer):
         # with tf.variable_scope(tf.get_variable_scope(), initializer=initializer):
         init = tf.global_variables_initializer()
-        sess.run(init)
+        # sess.run(init)
+        saver.restore(sess, "/tmp/model.ckpt")
         merged = tf.summary.merge_all()
         train_writer = tf.summary.FileWriter('./train' ,sess.graph)
 
         ITERATIONS_PER_EPOCH = 100#int(10000/BATCH_SIZE) - 1
         NUM_EPOCHS = 100
 
+    epoch_error_list = []
+    test_accuracy_list = []
     for epoch in range(NUM_EPOCHS):
         print("Epoch Number: ",epoch)
         
@@ -149,13 +152,17 @@ def train():
             epoch_error_t = epoch_error_t + loss_val
             train_writer.add_summary(summary)
         epoch_error_t /= ITERATIONS_PER_EPOCH
+        epoch_error_list.append(epoch_error_t)
         print("Epoch Number: ", epoch, "Train Error :", epoch_error_t)
-        save_path = saver.save(sess, './saved_model')
+        
+        save_path = saver.save(sess, './tmp/model.ckpt')
+        print("Model Saved")
 
 
         #Test Accuracy Calc
+        test_accuracy = 0
         for k in range(TEST_EPOCHS):
-            test_accuracy = 0
+            
             x, y = generate_test_batch(num_bits=NUM_BITS, batch_size=BATCH_SIZE)    
             test_accuracy += sess.run(
                 [accuracy],
@@ -164,8 +171,20 @@ def train():
                     correct_outputs: y,
                 }
             )[0]
+
         test_accuracy = test_accuracy / TEST_EPOCHS
+        test_accuracy_list.append(test_accuracy)
         print("Epoch Number: ", epoch, "Test Acc :", test_accuracy)
+
+
+        with open('Train_error.txt', 'w') as f:   
+
+            for item in epoch_error_list:
+                f.write("%s\n"%item)
+
+        with open('Test_Acc.txt', 'w') as f:   
+            for item in test_accuracy_list:
+                f.write("%s\n"%item)
 
 train()
     
