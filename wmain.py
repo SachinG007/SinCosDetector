@@ -71,11 +71,11 @@ def generate_test_batch(step, num_bits, batch_size):
     y = np.empty((batch_size))
 
     # with open("input_data.txt", "rb") as fp:
-    with open("htest_data.txt", "rb") as fp:    
+    with open("test_data.txt", "rb") as fp:    
         X = pickle.load(fp)
 
     # with open("input_data_labels.txt","rb") as fp:
-    with open("htest_data_labels.txt", "rb") as fp:    
+    with open("test_data_labels.txt", "rb") as fp:    
         true_labels = pickle.load(fp)
 
     for i in range(batch_size):
@@ -144,7 +144,7 @@ def train():
         if only_testing == 0:
             sess.run(init)
         else:
-            saver.restore(sess, "./tmp_new/model.ckpt")
+            saver.restore(sess, "./tmp/model.ckpt")
             print("Loaded saved model")
 
         merged = tf.summary.merge_all()

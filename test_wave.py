@@ -14,9 +14,9 @@ def get_data():
 	noise_shift = noise_shift/5
 	wave_type = random.randint(1,2) #1 # +1 or -1 , wave A or wave B
 
-	mag = random.randint(1,2) # 5 #noise mag varies from 1 to 5
-	dist = random.randint(10,20)/100 #1.7 #distortion mag 1 to 1.7
-
+	mag = 1#random.randint(3,4) # 5 #noise mag varies from 1 to 5
+	dist = random.randint(10,20)/15 #1.7 #distortion mag 1 to 1.7
+	# dist = random.randint(30,40)/100 #1.7 #distortion mag 1 to 1.7
 
 	Fs = 50#samples will remain constant
 	sample = 50
@@ -60,6 +60,23 @@ for i in range(256):
 	sliding_window.append(wave)
 	true_labels.append(wave_type)
 
+#Bakchodi
+# wave_c = wave_c = np.concatenate((sliding_window[0],sliding_window[1]), axis=None)
+
+# sliding_window = []
+# true_labels = []
+# for i in range(11):
+
+# 	a = wave_c[i*5:i*5 + 50]
+# 	sliding_window.append(a)
+# 	if i<2:
+# 		true_labels.append(1)
+# 	elif i==10:
+# 		true_labels.append(1)
+# 	else:
+# 		true_labels.append(0)
+
+
 with open("test_data.txt", "wb") as fp:
 	pickle.dump(sliding_window, fp, protocol=2)
 
@@ -72,7 +89,7 @@ with open("test_data_labels.txt", "wb") as fp:
 
 sample = 50
 x = np.arange(sample)
-y = sliding_window[0]
+y = sliding_window[10-1]
 plt.plot(x, y)
 plt.xlabel('x')
 plt.ylabel('y')

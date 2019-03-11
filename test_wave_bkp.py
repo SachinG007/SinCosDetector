@@ -7,63 +7,63 @@ import random
 
 def get_data():
 
-	just_noise = random.randint(1,2) #noise or not
+	just_noise = 1#random.randint(1,2) #noise or not
 	pure_noise = random.randint(1,3) #if noise , pure noise or wavy noise	
 	f = 1#random.randint(1,3) #1 #num of cycles
+	noise_shift = random.randint(10,20)
+	noise_shift = noise_shift/5
 	wave_type = 2#random.randint(1,2) #1 # +1 or -1 , wave A or wave B
 
-	mag = 1#random.randint(1,2) # 5 #noise mag varies from 1 to 5
-	dist = .10#random.randint(10,20)/100 #1.7 #distortion mag 1 to 1.7
-
+	mag = 1#random.randint(3,4) # 5 #noise mag varies from 1 to 5
+	# dist = random.randint(10,20)/100 #1.7 #distortion mag 1 to 1.7
+	dist = .10#random.randint(30,40)/100 #1.7 #distortion mag 1 to 1.7
 
 	Fs = 50#samples will remain constant
 	sample = 50
 	x = np.arange(sample)
 	noise = mag * 0.0001*np.asarray(random.sample(range(0,1000),sample))
-	wave_c = -1 * np.sin(2 * np.pi * f * x / Fs ) + noise + dist * x/sample
+	wave = np.sin(2 * np.pi * f * x / Fs ) + noise + dist * x/sample
 
-	# noise = mag * 0.0001*np.asarray(random.sample(range(0,1000),25))
-	# wave_c = np.concatenate((wave, wave), axis=None)
+	if wave_type == 2:
+		wave = -1 * wave
 
-	# wave = np.sin(2 * np.pi * f * x / Fs ) + noise + dist * x/sample
+	if just_noise == 2:
+		if pure_noise==3:
 
-	# wave_c = np.concatenate((wave_c, wave), axis=None)
+			wave = noise
+			wave_type = 0
+
+		else:
+			wave = np.sin(2 * np.pi * f * x / Fs + np.pi/noise_shift) + noise + dist * x/sample	
+			disp = int(sample/(2*noise_shift))		
+			wave[sample-disp:sample] = mag * 0.0001*np.asarray(random.sample(range(0,1000),disp))
+			if wave_type == 2:
+				wave = -1 * wave
+			wave_type = 0
+
+
+
 	# plt.plot(x, y)
 	# plt.xlabel('x')
 	# plt.ylabel('y')
 	# plt.show()
-	# wave = (wave - np.mean(wave))/np.std(wave)
-	return wave_c,wave_type
+	wave = (wave - np.mean(wave))/np.std(wave)
+	return wave,wave_type
  
 
 sliding_window = []
 true_labels = []
  
-
-# wave, wave_type = get_data()
-# for i in range(11):
-# 	a = wave[i*5:i*5 + 50]
-# 	sliding_window.append(a)
-# 	if i<2:
-# 		true_labels.append(1)
-# 	elif i==9:
-# 		true_labels.append(1)
-# 	else:
-# 		true_labels.append(0)
-
-for i in range(256):
+for i in range(1):
 	wave, wave_type = get_data()
 	print(wave_type)
 	sliding_window.append(wave)
 	true_labels.append(wave_type)
 
-# sliding_window.append(wave)
-# true_labels.append(wave_type)
-
-with open("htest_data.txt", "wb") as fp:
+with open("test_data.txt", "wb") as fp:
 	pickle.dump(sliding_window, fp, protocol=2)
 
-with open("htest_data_labels.txt", "wb") as fp:
+with open("test_data_labels.txt", "wb") as fp:
 	pickle.dump(true_labels, fp, protocol=2)
 
 # with open('input_data.txt', 'wb') as f:
@@ -72,7 +72,7 @@ with open("htest_data_labels.txt", "wb") as fp:
 
 sample = 50
 x = np.arange(sample)
-y = sliding_window[7]
+y = sliding_window[0]
 plt.plot(x, y)
 plt.xlabel('x')
 plt.ylabel('y')
