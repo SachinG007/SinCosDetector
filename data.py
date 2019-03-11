@@ -8,7 +8,7 @@ import random
 def get_data():
 
 	just_noise = random.randint(1,3)
-	f = random.randint(1,3) #1 #num of cycles
+	f = 1
 	wave_type = random.randint(1,2) #1 # +1 or -1 , wave A or wave B
 
 	mag = random.randint(1,5) # 5 #noise mag varies from 1 to 5

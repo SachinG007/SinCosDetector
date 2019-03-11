@@ -12,19 +12,22 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1"
 parser = argparse.ArgumentParser()
 parser.add_argument("--test", type=int, default=0, help="do you want to test only")
 parser.add_argument("--batch_size", type=int, default=256, help="batch size")
-
+parser.add_argument("--test_iters", type=int, default=7, help="Test Epocs")
+parser.add_argument("--learning_rate", type = float , default=0.0001, help="LEARNING_RATE")
+parser.add_argument("--num_epochs", type = int , default=100, help="Num Epochs")
 a = parser.parse_args()
 
-NUM_BITS = 1000
+NUM_BITS = 50
 INPUT_SIZE    = 1       
-RNN_HIDDEN    = 20
+RNN_HIDDEN    = 32
+FC1_OUT_SIZE = 16
 OUTPUT_SIZE   = 3      
 TINY          = 1e-6   
-LEARNING_RATE = 0.0001
+LEARNING_RATE = a.learning_rate
 BATCH_SIZE = a.batch_size
-TEST_EPOCHS = 7
+TEST_ITERS = a.test_iters
 ITERATIONS_PER_EPOCH = 65#int(20000/BATCH_SIZE) - 1
-NUM_EPOCHS = 100
+NUM_EPOCHS = a.num_epochs
 max_gradient_norm = 10
 only_testing = a.test
 
@@ -62,21 +65,25 @@ def generate_batch(step, num_bits, batch_size):
         y[i] = true_labels[step * batch_size + i]
     return x, y
 
-def generate_test_batch(num_bits, batch_size):
+def generate_test_batch(step, num_bits, batch_size):
 
     x = np.empty((num_bits, batch_size, 1))
     y = np.empty((batch_size))
 
-    with open("input_data.txt", "rb") as fp:
+    # with open("input_data.txt", "rb") as fp:
+    with open("htest_data.txt", "rb") as fp:    
         X = pickle.load(fp)
 
-    with open("input_data_labels.txt","rb") as fp:
+    # with open("input_data_labels.txt","rb") as fp:
+    with open("htest_data_labels.txt", "rb") as fp:    
         true_labels = pickle.load(fp)
 
     for i in range(batch_size):
         # for j in range(num_bits):        
-        x[:, i, 0] = X[18000 - 1 + i]
-        y[i] = true_labels[18000 - 1 + i]
+        # x[:, i, 0] = X[18000 - 1 + step*batch_size + i]
+        x[:, i, 0] = X[step*batch_size + i]
+        # y[i] = true_labels[18000 - 1 + step*batch_size + i]
+        y[i] = true_labels[step*batch_size + i]
     return x, y
 
 def train():
@@ -94,9 +101,11 @@ def train():
     rnn_outputs_last_r = tf.reshape(rnn_outputs_last,[BATCH_SIZE,RNN_HIDDEN])
     # import pdb;pdb.set_trace()
 
-    predicted_outputs = tf.contrib.layers.fully_connected(rnn_outputs_last_r, OUTPUT_SIZE)
+    fc1_outputs = tf.contrib.layers.fully_connected(rnn_outputs_last_r, FC1_OUT_SIZE)
+    predicted_outputs = tf.contrib.layers.fully_connected(fc1_outputs, OUTPUT_SIZE)
 
     #test error part
+    predicts = tf.argmax(predicted_outputs, 1)
     correct_prediction = tf.equal(tf.argmax(predicted_outputs, 1), correct_outputs)
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
@@ -135,7 +144,7 @@ def train():
         if only_testing == 0:
             sess.run(init)
         else:
-            saver.restore(sess, "./tmp/model.ckpt")
+            saver.restore(sess, "./tmp_new/model.ckpt")
             print("Loaded saved model")
 
         merged = tf.summary.merge_all()
@@ -152,43 +161,51 @@ def train():
         
         epoch_error_t = 0
         
-        for step in range(ITERATIONS_PER_EPOCH):
+        # for step in range(ITERATIONS_PER_EPOCH):
 
-            x, y = generate_batch(step, num_bits=NUM_BITS, batch_size=BATCH_SIZE)
+        #     x, y = generate_batch(step, num_bits=NUM_BITS, batch_size=BATCH_SIZE)
             
-            _, loss_val, summary = sess.run(
-                [apply_gradient_op, loss, merged],
-                feed_dict={
-                    inputs: x, 
-                    correct_outputs: y,
-                }
-            ) 
-
-            # print("step: ", step, "loss: ",loss_val)
-            epoch_error_t = epoch_error_t + loss_val
-            train_writer.add_summary(summary)
-        epoch_error_t /= ITERATIONS_PER_EPOCH
-        epoch_error_list.append(epoch_error_t)
-        print("Epoch Number: ", epoch, "Train Error :", epoch_error_t)
+        #     _, loss_val, summary, predicts_o = sess.run(
+        #         [apply_gradient_op, loss, merged, predicts],
+        #         feed_dict={
+        #             inputs: x, 
+        #             correct_outputs: y,
+        #         }
+        #     ) 
+        #     # print(y)
+        #     # print("predicted")
+        #     print(predicts_o)
+        #     # print("step: ", step, "loss: ",loss_val)
+        #     epoch_error_t = epoch_error_t + loss_val
+        #     train_writer.add_summary(summary)
+        # epoch_error_t /= ITERATIONS_PER_EPOCH
+        # epoch_error_list.append(epoch_error_t)
+        # print("Epoch Number: ", epoch, "Train Error :", epoch_error_t)
         
-        save_path = saver.save(sess, './tmp/model.ckpt')
-        print("Model Saved")
+        # save_path = saver.save(sess, './tmp_new/model.ckpt')
+        # print("Model Saved")
 
 
         #Test Accuracy Calc
         test_accuracy = 0
-        for k in range(TEST_EPOCHS):
+        for k in range(TEST_ITERS):
             
-            x, y = generate_test_batch(num_bits=NUM_BITS, batch_size=BATCH_SIZE)    
-            test_accuracy += sess.run(
-                [accuracy],
+            x, y = generate_test_batch(k, num_bits=NUM_BITS, batch_size=BATCH_SIZE)    
+            test_accuracy_temp, predicts_o = sess.run(
+                [accuracy, predicts],
                 feed_dict={
                     inputs: x, 
                     correct_outputs: y,
                 }
-            )[0]
+            )
 
-        test_accuracy = test_accuracy / TEST_EPOCHS
+            test_accuracy += test_accuracy_temp
+            print(y)
+            print("Preicted Labels")
+            print(predicts_o)
+
+
+        test_accuracy = test_accuracy / TEST_ITERS
         test_accuracy_list.append(test_accuracy)
         print("Epoch Number: ", epoch, "Test Acc :", test_accuracy)
 
