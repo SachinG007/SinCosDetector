@@ -102,6 +102,7 @@ def train():
     # import pdb;pdb.set_trace()
 
     fc1_outputs = tf.contrib.layers.fully_connected(rnn_outputs_last_r, FC1_OUT_SIZE)
+    # fc1_outputs_relu = tf.nn.relu(fc1_outputs)
     predicted_outputs = tf.contrib.layers.fully_connected(fc1_outputs, OUTPUT_SIZE)
 
     #test error part
@@ -144,7 +145,7 @@ def train():
         if only_testing == 0:
             sess.run(init)
         else:
-            saver.restore(sess, "./tmp/model.ckpt")
+            saver.restore(sess, "./tmp2/model.ckpt")
             print("Loaded saved model")
 
         merged = tf.summary.merge_all()
@@ -161,29 +162,29 @@ def train():
         
         epoch_error_t = 0
         
-        # for step in range(ITERATIONS_PER_EPOCH):
+        for step in range(ITERATIONS_PER_EPOCH):
 
-        #     x, y = generate_batch(step, num_bits=NUM_BITS, batch_size=BATCH_SIZE)
+            x, y = generate_batch(step, num_bits=NUM_BITS, batch_size=BATCH_SIZE)
             
-        #     _, loss_val, summary, predicts_o = sess.run(
-        #         [apply_gradient_op, loss, merged, predicts],
-        #         feed_dict={
-        #             inputs: x, 
-        #             correct_outputs: y,
-        #         }
-        #     ) 
-        #     # print(y)
-        #     # print("predicted")
-        #     print(predicts_o)
-        #     # print("step: ", step, "loss: ",loss_val)
-        #     epoch_error_t = epoch_error_t + loss_val
-        #     train_writer.add_summary(summary)
-        # epoch_error_t /= ITERATIONS_PER_EPOCH
-        # epoch_error_list.append(epoch_error_t)
-        # print("Epoch Number: ", epoch, "Train Error :", epoch_error_t)
+            _, loss_val, summary, predicts_o = sess.run(
+                [apply_gradient_op, loss, merged, predicted_outputs],
+                feed_dict={
+                    inputs: x, 
+                    correct_outputs: y,
+                }
+            ) 
+            # print(y)
+            # print("predicted")
+            print(predicts_o)
+            # print("step: ", step, "loss: ",loss_val)
+            epoch_error_t = epoch_error_t + loss_val
+            train_writer.add_summary(summary)
+        epoch_error_t /= ITERATIONS_PER_EPOCH
+        epoch_error_list.append(epoch_error_t)
+        print("Epoch Number: ", epoch, "Train Error :", epoch_error_t)
         
-        # save_path = saver.save(sess, './tmp_new/model.ckpt')
-        # print("Model Saved")
+        save_path = saver.save(sess, './tmp2/model.ckpt')
+        print("Model Saved")
 
 
         #Test Accuracy Calc

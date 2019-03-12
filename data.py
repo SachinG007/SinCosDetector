@@ -7,12 +7,12 @@ import random
 
 def get_data():
 
-	just_noise = random.randint(1,3)
+	just_noise = 1#random.randint(1,3)
 	f = 1
-	wave_type = random.randint(1,2) #1 # +1 or -1 , wave A or wave B
+	wave_type = 1#random.randint(1,2) #1 # +1 or -1 , wave A or wave B
 
-	mag = random.randint(1,5) # 5 #noise mag varies from 1 to 5
-	dist = random.randint(10,17)/10 #1.7 #distortion mag 1 to 1.7
+	mag = 1#random.randint(1,5) # 5 #noise mag varies from 1 to 5
+	dist = 1#random.randint(10,17)/10 #1.7 #distortion mag 1 to 1.7
 
 	Fs = 1000#samples will remain constant
 	sample = 1000
@@ -39,16 +39,16 @@ def get_data():
 sliding_window = []
 true_labels = []
  
-for i in range(10000):
+for i in range(1):
 	wave, wave_type = get_data()
 	sliding_window.append(wave)
 	true_labels.append(wave_type)
 
-with open("input_data.txt", "wb") as fp:
-	pickle.dump(sliding_window, fp, protocol=2)
+# with open("input_data.txt", "wb") as fp:
+# 	pickle.dump(sliding_window, fp, protocol=2)
 
-with open("input_data_labels.txt", "wb") as fp:
-	pickle.dump(true_labels, fp, protocol=2)
+# with open("input_data_labels.txt", "wb") as fp:
+# 	pickle.dump(true_labels, fp, protocol=2)
 
 # with open('input_data.txt', 'wb') as f:
 #     for item in sliding_window:
@@ -56,7 +56,7 @@ with open("input_data_labels.txt", "wb") as fp:
 
 sample = 1000
 x = np.arange(sample)
-y = sliding_window[2]
+y = sliding_window[0]
 plt.plot(x, y)
 plt.xlabel('x')
 plt.ylabel('y')

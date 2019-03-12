@@ -7,15 +7,15 @@ import random
 
 def get_data():
 
-	just_noise = random.randint(1,3) #noise or not
-	pure_noise = random.randint(1,3) #if noise , pure noise or wavy noise	
+	just_noise = 3#random.randint(1,3) #noise or not
+	pure_noise = 1#random.randint(1,3) #if noise , pure noise or wavy noise	
 	f = 1#random.randint(1,3) #1 #num of cycles
-	noise_shift = random.randint(10,20)
-	noise_shift = noise_shift/5
-	wave_type = random.randint(1,2) #1 # +1 or -1 , wave A or wave B
+	noise_shift = 15#random.randint(10,20)
+	noise_shift = noise_shift/5.0
+	wave_type = 1#random.randint(1,2) #1 # +1 or -1 , wave A or wave B
 
-	mag = random.randint(1,2) # 5 #noise mag varies from 1 to 5
-	dist = random.randint(10,20)/100 #1.7 #distortion mag 1 to 1.7
+	mag = 1#random.randint(1,2) # 5 #noise mag varies from 1 to 5
+	dist = .2#random.randint(10,20)/100 #1.7 #distortion mag 1 to 1.7
 
 
 	Fs = 50#samples will remain constant
@@ -54,17 +54,17 @@ def get_data():
 sliding_window = []
 true_labels = []
  
-for i in range(20000):
+for i in range(1):
 	wave, wave_type = get_data()
 	# print(wave_type)
 	sliding_window.append(wave)
 	true_labels.append(wave_type)
 
-with open("input_data.txt", "wb") as fp:
-	pickle.dump(sliding_window, fp, protocol=2)
+# with open("input_data.txt", "wb") as fp:
+# 	pickle.dump(sliding_window, fp, protocol=2)
 
-with open("input_data_labels.txt", "wb") as fp:
-	pickle.dump(true_labels, fp, protocol=2)
+# with open("input_data_labels.txt", "wb") as fp:
+# 	pickle.dump(true_labels, fp, protocol=2)
 
 # with open('input_data.txt', 'wb') as f:
 #     for item in sliding_window:

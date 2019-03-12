@@ -7,12 +7,12 @@ import random
 
 def get_data():
 
-	just_noise = random.randint(1,2) #noise or not
+	just_noise = 1#random.randint(1,2) #noise or not
 	pure_noise = random.randint(1,3) #if noise , pure noise or wavy noise	
 	f = 1#random.randint(1,3) #1 #num of cycles
 	noise_shift = random.randint(10,20)
 	noise_shift = noise_shift/5
-	wave_type = random.randint(1,2) #1 # +1 or -1 , wave A or wave B
+	wave_type = 1#random.randint(1,2) #1 # +1 or -1 , wave A or wave B
 
 	mag = 1#random.randint(3,4) # 5 #noise mag varies from 1 to 5
 	dist = random.randint(10,20)/15 #1.7 #distortion mag 1 to 1.7
